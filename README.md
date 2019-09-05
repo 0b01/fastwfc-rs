@@ -1,3 +1,3 @@
 # fastwfc-rs
 
-Bindings to fastwfc C++ library.
+Rust bindings to [fastwfc](https://github.com/math-fehr/fast-wfc).

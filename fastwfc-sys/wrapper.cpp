@@ -35,8 +35,8 @@ int get_random_seed() {
 
 class ArrayColor2D {
 public:
-  ArrayColor2D(): init(false), inner(0,0) {}
-  ArrayColor2D(Array2D<Color> inner): init(true), inner(inner) {}
+  ArrayColor2D(): init(false), inner(0,0), ref(nullptr) {}
+  ArrayColor2D(Array2D<Color> inner): init(true), inner(inner), ref(nullptr) {}
 
   bool init;
   Array2D<Color> inner;

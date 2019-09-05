@@ -35,38 +35,70 @@ fn from_array_color_2d(c: *mut fastwfc_sys::ArrayColor2D) -> Option<image::RgbaI
     }
 }
 
+/// Generat a new image with the overlapping WFC algorithm
 pub struct Overlapping {
+    /// Toric input, defaults to false
     pub periodic_input: bool,
+    /// Toric output, defaults to false
     pub periodic_output: bool,
+    /// The height of the output in pixels
     pub out_height: u64,
+    /// The width of the output in pixels
     pub out_width: u64,
-    pub symmetry: u64,
+    /// Number of symmetries from 0 to 8
+    /// If the pattern already exist, increase its number of appearance.
+    pub symmetry: u8,
+    /// Set the ground of the output image.
+    /// > The lowest middle pattern is used as a floor (and ceiling when the input is
+    /// > toric) and is placed at the lowest possible pattern position in the output
+    /// > image, on all its width. The pattern cannot be used at any other place in
+    /// > the output image.
+    ///
+    /// Defaults to false
     pub ground: bool,
+    /// Width and height in pixel of the patterns
     pub pattern_size: u64,
 }
 
 impl Overlapping {
-    pub fn new(
-        periodic_input: bool,
-        periodic_output: bool,
-        out_height: u64,
-        out_width: u64,
-        symmetry: u64,
-        ground: bool,
-        pattern_size: u64,
-    ) -> Self {
+    /// Create a new Overlapping WFC generator
+    pub fn new( out_height: u64, out_width: u64, pattern_size: u64) -> Self {
         Self {
-            periodic_input,
-            periodic_output,
+            periodic_input: false,
+            periodic_output: false,
             out_height,
             out_width,
-            symmetry,
-            ground,
+            symmetry: 8,
+            ground: false,
             pattern_size,
         }
     }
 
-    fn get_options(&self) -> fastwfc_sys::OverlappingWFCOptions {
+    /// Set number of symmetries.
+    pub fn symmetry(&mut self, value: u8) -> &mut Self {
+        self.symmetry = value;
+        self
+    }
+
+    /// Set whether the generated image contains ground
+    pub fn ground(&mut self, value: bool) -> &mut Self {
+        self.ground = value;
+        self
+    }
+
+    /// Set whether input is toric
+    pub fn periodic_input(&mut self, value: bool) -> &mut Self {
+        self.periodic_input = value;
+        self
+    }
+
+    /// Set whether output is toric
+    pub fn periodic_output(&mut self, value: bool) -> &mut Self {
+        self.periodic_output = value;
+        self
+    }
+
+    fn as_ffi_opts(&self) -> fastwfc_sys::OverlappingWFCOptions {
         fastwfc_sys::OverlappingWFCOptions {
             periodic_input: self.periodic_input,
             periodic_output: self.periodic_output,
@@ -78,25 +110,26 @@ impl Overlapping {
         }
     }
 
-    pub fn run(&self, input: image::RgbaImage, tries: u32) -> Option<image::RgbaImage> {
+    /// Generate WFC based on input image
+    pub fn generate(&self, input: image::RgbaImage, tries: u32) -> Option<image::RgbaImage> {
         let array2d = to_array_color_2d(input);
-        let ret = unsafe { run_overlapping(array2d, self.get_options(), tries) };
-        destroy_vec_ref(array2d);
+        let ret = unsafe { run_overlapping(array2d, self.as_ffi_opts(), tries) };
+        destroy_arr_2d(array2d);
         unsafe {
-            fastwfc_sys::destroy_array_color_2d(array2d);
+            let result = from_array_color_2d(ret);
+            destroy_arr_2d(ret);
+            result
         }
-        let result = from_array_color_2d(ret);
-        unsafe {
-            fastwfc_sys::destroy_array_color_2d(ret);
-        }
-        result
     }
 }
 
-fn destroy_vec_ref(c: *mut fastwfc_sys::ArrayColor2D) {
-    let ptr = unsafe { fastwfc_sys::array_color_2d_get_ref(c) } as *mut Vec<u8>;
-    let obj: Box<Vec<u8>> = unsafe { Box::from_raw(ptr) };
-    ::std::mem::drop(obj);
+fn destroy_arr_2d(c: *mut fastwfc_sys::ArrayColor2D) {
+    if ::std::ptr::null() != unsafe{(*c).ref_} {
+        let ptr = unsafe { fastwfc_sys::array_color_2d_get_ref(c) } as *mut Vec<u8>;
+        let obj: Box<Vec<u8>> = unsafe { Box::from_raw(ptr) };
+        ::std::mem::drop(obj);
+    }
+    unsafe { fastwfc_sys::destroy_array_color_2d(c); }
 }
 
 #[cfg(test)]
@@ -104,11 +137,11 @@ mod test {
     use super::*;
     #[test]
     fn test_run_overlapping() {
-        let runner = Overlapping::new(true, true, 100, 100, 1, false, 2);
+        let runner = Overlapping::new(100, 100, 2);
         let input = image::open("../fastwfc-sys/fast-wfc/example/samples/Chess.png")
             .unwrap()
             .to_rgba();
-        let output = runner.run(input, 100);
+        let output = runner.generate(input, 100);
         println!("{:#?}", output);
         output.unwrap().save("out.png").unwrap();
     }
