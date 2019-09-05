@@ -1,11 +1,11 @@
 [package]
-name = "fastwfc"
+name = "fastwfc-cli"
 version = "0.1.0"
-authors = ["ricky han <github@rickyhan.com>"]
+authors = ["Ricky Han <rickylqhan@gmail.com>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-fastwfc-sys = { path = "../fastwfc-sys" }
+fastwfc = { path = "../fastwfc" }
 image = "0.22.1"

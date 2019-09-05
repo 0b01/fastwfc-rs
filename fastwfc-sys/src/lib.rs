@@ -4,11 +4,6 @@
 
 include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 
-pub struct FastWFC {
-
-}
-
-
 #[test]
 fn test_fastwfc() {
     assert!(true);
