@@ -9,5 +9,5 @@ description = "Rust bindings to libfastwfc"
 license = "MIT"
 
 [dependencies]
-fastwfc-sys = { path = "../fastwfc-sys" }
+fastwfc-sys = "0.1.0"
 image = "0.22.1"
