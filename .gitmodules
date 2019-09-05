@@ -1,0 +1,3 @@
+[submodule "fastwfc-sys/fast-wfc"]
+	path = fastwfc-sys/fast-wfc
+	url = https://github.com/math-fehr/fast-wfc

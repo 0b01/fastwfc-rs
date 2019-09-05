@@ -1,0 +1,13 @@
+[package]
+name = "fastwfc-sys"
+version = "0.1.0"
+authors = ["ricky han <github@rickyhan.com>"]
+edition = "2018"
+build = "build.rs"
+link = "magic"
+
+[dependencies]
+
+[build-dependencies]
+bindgen = "0.51.0"
+cmake = "0.1"
