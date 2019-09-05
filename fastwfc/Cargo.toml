@@ -3,8 +3,10 @@ name = "fastwfc"
 version = "0.1.0"
 authors = ["ricky han <github@rickyhan.com>"]
 edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+doc = true
+repository = "https://github.com/rickyhan/fastwfc-rs"
+description = "Rust bindings to libfastwfc"
+license = "MIT"
 
 [dependencies]
 fastwfc-sys = { path = "../fastwfc-sys" }
