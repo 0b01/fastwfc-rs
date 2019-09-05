@@ -1,3 +1,4 @@
 # fastwfc-rs
 
-Rust bindings to [fastwfc](https://github.com/math-fehr/fast-wfc).
+Rust bindings to the wrapping wfc generator in [fastwfc](https://github.com/math-fehr/fast-wfc).
+

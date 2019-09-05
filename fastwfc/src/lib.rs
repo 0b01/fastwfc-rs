@@ -35,7 +35,20 @@ fn from_array_color_2d(c: *mut fastwfc_sys::ArrayColor2D) -> Option<image::RgbaI
     }
 }
 
+fn destroy_arr_2d(c: *mut fastwfc_sys::ArrayColor2D) {
+    // if there is a Vec reference originally allocated from Rust
+    // Drop it by converting it back to a Box
+    if ::std::ptr::null() != unsafe{(*c).ref_} {
+        let ptr = unsafe { fastwfc_sys::array_color_2d_get_ref(c) } as *mut Vec<u8>;
+        let obj: Box<Vec<u8>> = unsafe { Box::from_raw(ptr) };
+        ::std::mem::drop(obj);
+    }
+    // delete ArrayColor2D that C++ allocated
+    unsafe { fastwfc_sys::destroy_array_color_2d(c); }
+}
+
 /// Generat a new image with the overlapping WFC algorithm
+#[derive(Clone, Copy)]
 pub struct Overlapping {
     /// Toric input, defaults to false
     pub periodic_input: bool,
@@ -48,7 +61,7 @@ pub struct Overlapping {
     /// Number of symmetries from 0 to 8
     /// If the pattern already exist, increase its number of appearance.
     pub symmetry: u8,
-    /// Set the ground of the output image.
+    /// Output image contains ground
     /// > The lowest middle pattern is used as a floor (and ceiling when the input is
     /// > toric) and is placed at the lowest possible pattern position in the output
     /// > image, on all its width. The pattern cannot be used at any other place in
@@ -115,21 +128,10 @@ impl Overlapping {
         let array2d = to_array_color_2d(input);
         let ret = unsafe { run_overlapping(array2d, self.as_ffi_opts(), tries) };
         destroy_arr_2d(array2d);
-        unsafe {
-            let result = from_array_color_2d(ret);
-            destroy_arr_2d(ret);
-            result
-        }
+        let result = from_array_color_2d(ret);
+        destroy_arr_2d(ret);
+        result
     }
-}
-
-fn destroy_arr_2d(c: *mut fastwfc_sys::ArrayColor2D) {
-    if ::std::ptr::null() != unsafe{(*c).ref_} {
-        let ptr = unsafe { fastwfc_sys::array_color_2d_get_ref(c) } as *mut Vec<u8>;
-        let obj: Box<Vec<u8>> = unsafe { Box::from_raw(ptr) };
-        ::std::mem::drop(obj);
-    }
-    unsafe { fastwfc_sys::destroy_array_color_2d(c); }
 }
 
 #[cfg(test)]
@@ -142,7 +144,6 @@ mod test {
             .unwrap()
             .to_rgba();
         let output = runner.generate(input, 100);
-        println!("{:#?}", output);
-        output.unwrap().save("out.png").unwrap();
+        assert!(output.is_some());
     }
 }
