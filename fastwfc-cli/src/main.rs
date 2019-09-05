@@ -1,7 +1,7 @@
 extern crate fastwfc;
 
 fn main() {
-    for i in 0..100 {
+    for i in 0..1000 {
         let runner = fastwfc::Overlapping::new(true, true, 100, 100, 1, false, 2);
         let input = image::open("fastwfc-sys/fast-wfc/example/samples/Chess.png")
             .unwrap()
