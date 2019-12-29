@@ -10,4 +10,4 @@ license = "MIT"
 
 [dependencies]
 fastwfc-sys = "0.1.0"
-image = "0.22.1"
+image = "0.22.3"

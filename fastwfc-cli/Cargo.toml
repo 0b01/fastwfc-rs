@@ -9,5 +9,5 @@ license = "MIT"
 
 [dependencies]
 fastwfc = "0.1.0"
-image = "0.22.1"
+image = "0.22.3"
 structopt = "0.3.0"
