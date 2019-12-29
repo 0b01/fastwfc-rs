@@ -12,6 +12,6 @@ license = "MIT"
 [dependencies]
 
 [build-dependencies]
-bindgen = "0.51.0"
+bindgen = "0.52.0"
 cmake = "0.1"
 cc = "1.0.42"
